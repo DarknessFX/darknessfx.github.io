@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Gamepad API buttons test page</title>
+    <style>
+      #ButtonsBall, #DPadBall, #LStickBall, #RStickBall {
+        width: 40px;
+        height: 40px;
+        border-radius: 20px;
+        font-weight: bold;
+        background-image: radial-gradient(circle at 40% 40%, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.4));
+        position: relative;
+      }
+
+      #ButtonsBall {
+        background-color: red;
+      }
+
+      #LStickBall {
+        background-color: green;
+      }
+
+      #RStickBall {
+        background-color: yellow;
+      }
+
+
+      #DPadBall {
+        width: 40px;
+        height: 40px;
+        border-radius: 20px;
+        background-color: blue;
+        background-image: radial-gradient(circle at 40% 40%, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.4));
+        position: relative;
+      }
+
+
+      div { display: inline-block; }
+
+      .active {
+        background-color: red;
+        color: white;
+      }
+
+      .scale {
+        background-color: blue;
+      }
+
+      #L1, #L2, #L3,
+      #R1, #R2, #R3
+      #DPadU, #DPadD, #DPadL, #DPadR,
+      #Button1, #Button2, #Button3, #Button4,
+      #Extra1, #Extra2, #Extra3, #Extra4,
+      #Select, #Start {
+        width: 160px; 
+      }
+    </style>
+  </head>
+
+  <body>
+    Study Source:<br/>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API">https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API</a><br/>
+    <a href="https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API">https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API</a><br/>
+    <a href="http://chrisdavidmills.github.io/gamepad-buttons/">http://chrisdavidmills.github.io/gamepad-buttons/</a><br/><hr/>
+
+    <p id="gamepad-info">Waiting for Gamepad.</p>
+
+    <div id="gamepad" style="display: block;">
+      <div style="display: block;">
+        <div>
+          <div id="L3">L3</div><br/>
+          <div id="L2">L2</div><br/>
+          <div id="L1">L1</div><br/>
+        </div>
+        <div>
+          <div id="R3">R3</div><br/>
+          <div id="R2">R2</div><br/>
+          <div id="R1">R1</div><br/>
+        </div>
+      </div>
+      <div style="display: block;">
+        <div>
+          <div id="DPadU">DPad Up</div><br/>
+          <div id="DPadD">DPad Down</div><br/>
+          <div id="DPadL">DPad Left</div><br/>
+          <div id="DPadR">DPad Right</div><br/>
+        </div>
+        <div>
+          <div id="Button1">Button 1</div><br/>
+          <div id="Button2">Button 2</div><br/>
+          <div id="Button3">Button 3</div><br/>
+          <div id="Button4">Button 4</div><br/>
+        </div>
+      </div>
+      <div style="display: block;">
+        <div id="Select">Select</div>
+        <div id="Start">Start</div>
+      </div>
+      <div style="display: block;">
+        <div id="Extra1">Extra 1</div><br/>
+        <!--
+        <div id="Extra2">Extra 2</div><br/>
+        <div id="Extra3">Extra 3</div><br/>
+        <div id="Extra4">Extra 4</div><br/>
+        -->
+      </div>
+
+      <div  style="display: block;">
+        <div id="L2Axis" style="width: 160px;">L2 Axis</div>
+        <div id="R2Axis" style="width: 160px;">R2 Axis</div><br/>
+        <div style="width: 160px; border: 1px solid black;"><div id="L2Scale" class="scale">&nbsp;</div></div>
+        <div style="width: 160px; border: 1px solid black;"><div id="R2Scale" class="scale">&nbsp;</div></div>
+      </div>
+
+      <div  style="display: block;">
+        <div id="LStickX" style="width: 160px;">LStickX Axis</div>
+        <div id="LStickY" style="width: 160px;">LStickY Axis</div><br/>
+        <div style="width: 160px; border: 1px solid black;"><div id="LStickXScale" class="scale">&nbsp;</div></div>
+        <div style="width: 160px; border: 1px solid black;"><div id="LStickYScale" class="scale">&nbsp;</div></div>
+      </div>
+
+      <div  style="display: block;">
+        <div id="RStickX" style="width: 160px;">RStickX Axis</div>
+        <div id="RStickY" style="width: 160px;">RStickY Axis</div><br/>
+        <div style="width: 160px; border: 1px solid black;"><div id="RStickXScale" class="scale">&nbsp;</div></div>
+        <div style="width: 160px; border: 1px solid black;"><div id="RStickYScale" class="scale">&nbsp;</div></div>
+      </div>
+
+    </div><br/><br/>
+
+    <div id="ButtonsBall">Buttons</span></div></div>
+    <div id="DPadBall">DPad</div>
+    <div id="LStickBall">LStick</div>
+    <div id="RStickBall">RStick</div>
+
+  </body>
+
+<script>
+
+var gamepadInfo = document.getElementById("gamepad-info");
+var start;
+var bY = 0, bX = 0; // Buttons Ball - Red
+var dY = 0, dX = 0; // DPad Ball - Blue
+var lsY = 0, lsX = 0; // LStick Ball - Green
+var rsY = 0, rsX = 0; // RStick Ball - Yellow
+
+var rAF = window.requestAnimationFrame;
+var rAFStop = window.cancelRequestAnimationFrame;
+
+window.addEventListener("gamepadconnected", function() {
+  var gp = navigator.getGamepads()[0];
+  gamepadInfo.innerHTML = "Gamepad connected at index " + gp.index + ": " + gp.id + ". It has " + gp.buttons.length + " buttons and " + gp.axes.length + " axes.";
+
+  gameLoop();
+});
+
+window.addEventListener("gamepaddisconnected", function() {
+  gamepadInfo.innerHTML = "Waiting for gamepad.";
+
+  rAFStop(start);
+});
+
+if(navigator.webkitGetGamepads) {
+  // Webkit browser that uses prefixes
+  var interval = setInterval(webkitGP, 500);
+}
+
+function webkitGP() {
+  var gp = navigator.webkitGetGamepads()[0];
+  if(gp) {
+    gamepadInfo.innerHTML = "Gamepad connected at index " + gp.index + ": " + gp.id + ". It has " + gp.buttons.length + " buttons and " + gp.axes.length + " axes.";
+    gameLoop();
+    clearInterval(interval);
+  }
+}
+
+function gameLoop() {
+  var gp = navigator.getGamepads()[0];
+
+  // Face buttons
+  (gp.buttons[0].pressed) ? Button1.className = "active" : Button1.className = "";
+  (gp.buttons[1].pressed) ? Button2.className = "active" : Button2.className = "";
+  (gp.buttons[2].pressed) ? Button3.className = "active" : Button3.className = "";
+  (gp.buttons[3].pressed) ? Button4.className = "active" : Button4.className = "";
+
+  // Shoulder buttons
+  (gp.buttons[4].pressed) ? L1.className = "active" : L1.className = "";
+  (gp.buttons[5].pressed) ? R1.className = "active" : R1.className = "";
+  (gp.buttons[6].pressed) ? L2.className = "active" : L2.className = "";
+  (gp.buttons[7].pressed) ? R2.className = "active" : R2.className = "";
+
+  // Additional buttons
+  (gp.buttons[8].pressed) ? Select.className = "active" : Select.className = "";
+  (gp.buttons[9].pressed) ? Start.className = "active" : Start.className = "";
+  (gp.buttons[10].pressed) ? L3.className = "active" : L3.className = "";
+  (gp.buttons[11].pressed) ? R3.className = "active" : R3.className = "";
+
+  // DPad
+  (gp.buttons[12].pressed) ? DPadU.className = "active" : DPadU.className = "";
+  (gp.buttons[13].pressed) ? DPadD.className = "active" : DPadD.className = "";
+  (gp.buttons[14].pressed) ? DPadL.className = "active" : DPadL.className = "";
+  (gp.buttons[15].pressed) ? DPadR.className = "active" : DPadR.className = "";
+
+  // Extra buttons?
+  (gp.buttons[16].pressed) ? Extra1.className = "active" : Extra1.className = "";
+  //(gp.buttons[17].pressed) ? Extra2.className = "active" : Extra2.className = "";
+  //(gp.buttons[18].pressed) ? Extra3.className = "active" : Extra3.className = "";
+  //(gp.buttons[19].pressed) ? Extra4.className = "active" : Extra4.className = "";
+
+  // Shoulder Axis
+  if (gp.buttons[6].value) {
+    L2Axis.className = "active";
+    L2Axis.textContent = gp.buttons[6].value;
+  } else {
+    L2Axis.className = "";
+    L2Axis.textContent = "L2 Axis";
+  }
+  L2Scale.style.width = parseInt(L2Axis.style.width,10) * gp.buttons[6].value + "px";
+  if (gp.buttons[7].value) {
+    R2Axis.className = "active";
+    R2Axis.textContent = gp.buttons[7].value;
+  } else {
+    R2Axis.className = "";
+    R2Axis.textContent = "R2 Axis";
+  }
+  R2Scale.style.width = parseInt(R2Axis.style.width,10) * gp.buttons[7].value + "px";
+
+  // LStick Axis
+  if (Math.abs(gp.axes[0]) > 0.001) {
+    LStickX.className = "active";
+    LStickX.textContent = gp.axes[0];
+  } else {
+    LStickX.className = "";
+    LStickX.textContent = "LStickX Axis";
+  }
+  LStickXScale.style.width = (((parseInt(LStickX.style.width,10) / 2) * gp.axes[0]) + parseInt(LStickX.style.width,10) / 2) + "px";
+  if (Math.abs(gp.axes[1]) > 0.001) {
+    LStickY.className = "active";
+    LStickY.textContent = gp.axes[1];
+  } else {
+    LStickY.className = "";
+    LStickY.textContent = "LStickY Axis";
+  }
+  LStickYScale.style.width =  (((parseInt(LStickY.style.width,10) / 2) * gp.axes[1]) + parseInt(LStickY.style.width,10) / 2) + "px";
+
+  // RStick Axis
+  if (Math.abs(gp.axes[2]) > 0.001) {
+    RStickX.className = "active";
+    RStickX.textContent = gp.axes[0];
+  } else {
+    RStickX.className = "";
+    RStickX.textContent = "RStickX Axis";
+  }
+  RStickXScale.style.width = (((parseInt(RStickX.style.width,10) / 2) * gp.axes[2]) + parseInt(RStickX.style.width,10) / 2) + "px";
+  if (Math.abs(gp.axes[3]) > 0.001) {
+    RStickY.className = "active";
+    RStickY.textContent = gp.axes[1];
+  } else {
+    RStickY.className = "";
+    RStickY.textContent = "RStickY Axis";
+  }
+  RStickYScale.style.width =  (((parseInt(RStickY.style.width,10) / 2) * gp.axes[3]) + parseInt(RStickY.style.width,10) / 2) + "px";
+
+  // ButtonsBall movement
+  if (gp.buttons[0].value > 0 || gp.buttons[0].pressed == true) bY++;
+  if (gp.buttons[1].value > 0 || gp.buttons[1].pressed == true) bX++;
+  if (gp.buttons[2].value > 0 || gp.buttons[2].pressed == true) bX--;
+  if (gp.buttons[3].value > 0 || gp.buttons[3].pressed == true) bY--;
+  ButtonsBall.style.left = bX*2 + "px";
+  ButtonsBall.style.top = bY*2 + "px";
+
+  // DPadBall movement
+  if (gp.buttons[12].value > 0 || gp.buttons[12].pressed == true) dY--;
+  if (gp.buttons[13].value > 0 || gp.buttons[13].pressed == true) dY++;
+  if (gp.buttons[14].value > 0 || gp.buttons[14].pressed == true) dX--;
+  if (gp.buttons[15].value > 0 || gp.buttons[15].pressed == true) dX++;
+  DPadBall.style.left = dX*2 + "px";
+  DPadBall.style.top = dY*2 + "px";
+
+  // LStickBall movement
+  if (Math.abs(gp.axes[0]) > 0.001) {
+    lsX += gp.axes[0]*2;
+    LStickBall.style.left = lsX + "px";
+  }
+  if (Math.abs(gp.axes[1]) > 0.001) {
+    lsY += gp.axes[1]*2;
+    LStickBall.style.top = lsY + "px";
+  }
+  // RStickBall movement
+  if (Math.abs(gp.axes[2]) > 0.001) {
+    rsX += gp.axes[2]*2;
+    RStickBall.style.left = rsX + "px";
+  }
+  if (Math.abs(gp.axes[3]) > 0.001) {
+    rsY += gp.axes[3]*2;
+    RStickBall.style.top = rsY + "px";
+  }
+
+  // Haptic Feedback
+  /*
+  if (gp.buttons[0].pressed) gp.hapticActuators(0.25,200);
+  if (gp.buttons[1].pressed) gp.hapticActuators(0.5,200);
+  if (gp.buttons[2].pressed) gp.hapticActuators(0.75,200);
+  if (gp.buttons[3].pressed) gp.hapticActuators(1,200);
+  */
+
+  var start = rAF(gameLoop);
+};
+
+
+</script>
+</html>
