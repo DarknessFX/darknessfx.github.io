@@ -1,0 +1,39 @@
+@ECHO OFF
+SETLOCAL EnableDelayedExpansion
+REM === 
+REM UEDOCSTOPDF.BAT
+REM   CONVERT UNREAL ENGINE DOCUMENTATION TO PDF 
+REM ===
+REM   - Unzip files from UESource\Engine\Documentation\Builds
+REM   - Create a temp folder. example:  D:\UEDocs
+REM   - Move Builds\BlueprintAPI-HTML\en-us\BlueprintAPI to D:\UEDocs\Blueprint
+REM   - Move Builds\CppAPI-HTML\en-us\API to D:\UEDocs\Cpp
+REM   - Copy this UEDocsToPDF.bat to D:\UEDocs
+REM   - Replace the browser path with your browser executable. 
+REM   - Execute UEDocsToPDF.bat 
+REM   - Move D:\UEDocs\*.pdf to your ChatRTX Dataset folder.
+REM   - Delete D:\UEDocs folder
+
+SET curDir=%CD%
+
+SET browser="C:\Program Files\Opera\Opera.exe"
+SET args=--headless --disable-gpu --run-all-compositor-stages-before-draw --no-pdf-header-footer --print-to-pdf-no-header --print-to-pdf=
+
+SET outputFolder=%curDir%
+SET outputFile=
+SET outputExt=".pdf"
+
+SET inputFolder=%curDir%
+SET inputFile="index"
+SET inputExt=".html"
+
+FOR /D /R %%F IN (index.html) DO (
+  SET filepath=%%F
+  SET filepathclean=!filepath:%inputFolder%\=!
+  SET outputFile=!filepathclean:\=_!
+  SET outputFile=!outputFile:html=pdf!
+
+  ECHO Creating %outputFolder%\!outputFile!
+  %browser% %args%"%outputFolder%\!outputFile!" "%%F"
+  ECHO.
+)
