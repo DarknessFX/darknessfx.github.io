@@ -17,7 +17,7 @@ REM   - Delete D:\UEDocs folder
 SET curDir=%CD%
 
 SET browser="C:\Program Files\Opera\Opera.exe"
-SET args=--headless --disable-gpu --run-all-compositor-stages-before-draw --no-pdf-header-footer --print-to-pdf-no-header --print-to-pdf=
+SET args=--headless --disable-gpu --no-pdf-header-footer --print-to-pdf-no-header --print-to-pdf=
 
 SET outputFolder=%curDir%
 SET outputFile=
@@ -33,7 +33,11 @@ FOR /D /R %%F IN (index.html) DO (
   SET outputFile=!filepathclean:\=_!
   SET outputFile=!outputFile:html=pdf!
 
-  ECHO Creating %outputFolder%\!outputFile!
-  %browser% %args%"%outputFolder%\!outputFile!" "%%F"
-  ECHO.
+  IF NOT EXIST %outputFolder%\!outputFile! (
+    ECHO Creating %outputFolder%\!outputFile!
+    %browser% %args%"%outputFolder%\!outputFile!" "%%F"
+    ECHO.
+  ) ELSE (
+    ECHO Skipping %outputFolder%\!outputFile!
+  )
 )
